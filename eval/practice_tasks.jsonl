@@ -1,0 +1,32 @@
+{"id": "q01", "prompt": "What is the capital of Japan? Answer with only the city name.", "answer": "Tokyo"}
+{"id": "q02", "prompt": "What is the chemical symbol for gold? Answer with only the symbol.", "answer": "Au"}
+{"id": "q03", "prompt": "What is the largest planet in our solar system? Answer with only the planet name.", "answer": "Jupiter"}
+{"id": "q04", "prompt": "What is the first element on the periodic table? Answer with only the element name.", "answer": "Hydrogen"}
+{"id": "q05", "prompt": "What is 144 divided by 12? Answer with only the number.", "answer": "12"}
+{"id": "q06", "prompt": "What is 15% of 200? Answer with only the number.", "answer": "30"}
+{"id": "q07", "prompt": "What is 7 squared? Answer with only the number.", "answer": "49"}
+{"id": "q08", "prompt": "What is the square root of 81? Answer with only the number.", "answer": "9"}
+{"id": "q09", "prompt": "What is 3 factorial (3!)? Answer with only the number.", "answer": "6"}
+{"id": "q10", "prompt": "What is 1000 minus 1? Answer with only the number.", "answer": "999"}
+{"id": "q11", "prompt": "A train travels 60 km in 1.5 hours. What is its average speed in km/h? Answer with only the number.", "answer": "40"}
+{"id": "q12", "prompt": "If today is Monday, what day of the week is it 3 days later? Answer with only the day name.", "answer": "Thursday"}
+{"id": "q13", "prompt": "What is the next number in the sequence 2, 4, 8, 16, ...? Answer with only the number.", "answer": "32"}
+{"id": "q14", "prompt": "A is taller than B, and B is taller than C. Who is the shortest? Answer with only the letter.", "answer": "C"}
+{"id": "q15", "prompt": "All roses are flowers. Some flowers fade quickly. Can we conclude that all roses fade quickly? Answer only yes or no.", "answer": "no"}
+{"id": "q16", "prompt": "What is the opposite of 'hot'? Answer with only one word.", "answer": "cold"}
+{"id": "q17", "prompt": "What is the antonym of 'ascend'? Answer with only one word.", "answer": "descend"}
+{"id": "q18", "prompt": "What is the plural of the animal 'mouse'? Answer with only one word.", "answer": "mice"}
+{"id": "q19", "prompt": "Which of these is a verb: 'quickly', 'run', 'blue'? Answer with only the word.", "answer": "run"}
+{"id": "q20", "prompt": "Reverse the string 'cat'. Answer with only the reversed string.", "answer": "tac"}
+{"id": "q21", "prompt": "How many sides does a hexagon have? Answer with only the number.", "answer": "6"}
+{"id": "q22", "prompt": "What is the sum of the interior angles of a triangle in degrees? Answer with only the number.", "answer": "180"}
+{"id": "q23", "prompt": "What is the Roman numeral for 40? Answer with only the numeral.", "answer": "XL"}
+{"id": "q24", "prompt": "What is the binary representation of the decimal number 5? Answer with only the binary digits.", "answer": "101"}
+{"id": "q25", "prompt": "Which is larger, 0.9 or 0.85? Answer with only the number.", "answer": "0.9"}
+{"id": "q26", "prompt": "What is the last name of the author of 'Romeo and Juliet'? Answer with only the last name.", "answer": "Shakespeare"}
+{"id": "q27", "prompt": "How many continents are there on Earth? Answer with only the number.", "answer": "7"}
+{"id": "q28", "prompt": "What is the freezing point of water in degrees Celsius? Answer with only the number.", "answer": "0"}
+{"id": "q29", "prompt": "How many legs does a spider have? Answer with only the number.", "answer": "8"}
+{"id": "q30", "prompt": "How many days are in a leap year? Answer with only the number.", "answer": "366"}
+{"id": "q31", "prompt": "A bat and a ball cost $1.10 in total. The bat costs $1.00 more than the ball. How much does the ball cost in dollars? Answer with only the number, no dollar sign.", "answer": "0.05"}
+{"id": "q32", "prompt": "How many months of the year have at least 28 days? Answer with only the number.", "answer": "12"}

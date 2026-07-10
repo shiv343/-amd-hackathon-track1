@@ -21,6 +21,10 @@ LOCAL_MODEL = os.getenv("LOCAL_MODEL", "Qwen/Qwen2.5-14B-Instruct")  # W7900 48G
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.75"))
 SELF_CONSISTENCY_K = int(os.getenv("SELF_CONSISTENCY_K", "5"))
 
+# Fireworks is only used when a key is present (the scoring env, or local testing
+# with your own $50 key). Without it, the agent runs local-only (no escalation).
+FIREWORKS_ENABLED = bool(FIREWORKS_API_KEY)
+
 
 @dataclass(frozen=True)
 class Tier:

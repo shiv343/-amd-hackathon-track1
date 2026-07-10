@@ -27,12 +27,21 @@ def answer_task(task: dict, validator: Optional[Validator] = None) -> Result:
     if accept:
         return Result(task["id"], local.text, config.LOCAL_TIER.name, 0)
 
-    # Escalate through Fireworks, cheapest first — stop at the first verified answer.
+    # Local wasn't confidently verified. Escalate to Fireworks — cheapest first,
+    # stopping at the first verified answer. Only if Fireworks is configured;
+    # without a key (local-only testing) we keep the best local answer rather
+    # than crash.
     best = Result(task["id"], local.text, config.LOCAL_TIER.name + "*", 0)
+    if not config.FIREWORKS_ENABLED:
+        return best
+
     for tier in config.FIREWORKS_LADDER:
-        before = clients.METER.total
-        fw = clients.fireworks_chat(tier.model, msgs, temperature=0.0)
-        spent = clients.METER.total - before
+        try:
+            before = clients.METER.total
+            fw = clients.fireworks_chat(tier.model, msgs, temperature=0.0)
+            spent = clients.METER.total - before
+        except Exception:
+            break  # Fireworks unreachable/errored — fall back to best local answer.
         best = Result(task["id"], fw.text, tier.name + "*", spent)
         if validator is None or validator(task, fw.text):
             return Result(task["id"], fw.text, tier.name, spent)
