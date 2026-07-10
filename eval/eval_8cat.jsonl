@@ -1,0 +1,32 @@
+{"id": "fac1", "category": "factual", "prompt": "What is the capital of Australia? Answer with only the city name.", "answer": "Canberra"}
+{"id": "fac2", "category": "factual", "prompt": "What is the chemical symbol for sodium? Answer with only the symbol.", "answer": "Na"}
+{"id": "fac3", "category": "factual", "prompt": "How many bones are in the adult human body? Answer with only the number.", "answer": "206"}
+{"id": "fac4", "category": "factual", "prompt": "In what year did World War II end? Answer with only the year.", "answer": "1945"}
+{"id": "mat1", "category": "math", "prompt": "Compute (12 + 8) * 3. Answer with only the number.", "answer": "60"}
+{"id": "mat2", "category": "math", "prompt": "What is 25% of 80? Answer with only the number.", "answer": "20"}
+{"id": "mat3", "category": "math", "prompt": "If x + 7 = 19, what is x? Answer with only the number.", "answer": "12"}
+{"id": "mat4", "category": "math", "prompt": "A shirt costs $40 and is discounted 30%. What is the sale price in dollars? Answer with only the number.", "answer": "28"}
+{"id": "sen1", "category": "sentiment", "prompt": "Classify the sentiment as positive, negative, or neutral: 'I absolutely loved this movie, it was fantastic!' Answer with only one word.", "answer": "positive"}
+{"id": "sen2", "category": "sentiment", "prompt": "Classify the sentiment as positive, negative, or neutral: 'The service was terrible and I want a refund.' Answer with only one word.", "answer": "negative"}
+{"id": "sen3", "category": "sentiment", "prompt": "Classify the sentiment as positive, negative, or neutral: 'The package arrived on Tuesday.' Answer with only one word.", "answer": "neutral"}
+{"id": "sen4", "category": "sentiment", "prompt": "Classify the sentiment as positive, negative, or neutral: 'This is the best day of my life!' Answer with only one word.", "answer": "positive"}
+{"id": "sum1", "category": "summarization", "metric": "keywords", "prompt": "Summarize in one short sentence: 'A small cat was stuck high in an oak tree for hours until local firefighters arrived with a ladder and safely brought it down to its relieved owner.'", "keywords": ["cat", "firefighter"]}
+{"id": "sum2", "category": "summarization", "metric": "keywords", "prompt": "Summarize in one short sentence: 'The tech company reported that its quarterly profit rose sharply, driven by strong demand for its new smartphone.'", "keywords": ["profit"]}
+{"id": "sum3", "category": "summarization", "metric": "keywords", "prompt": "Summarize in one short sentence: 'Heavy rains caused severe flooding across the region, forcing hundreds of families to evacuate their homes.'", "keywords": ["flood"]}
+{"id": "sum4", "category": "summarization", "metric": "keywords", "prompt": "Summarize in one short sentence: 'Scientists announced the discovery of a new species of frog in the Amazon rainforest during a recent expedition.'", "keywords": ["frog"]}
+{"id": "ner1", "category": "ner", "prompt": "List the person names in this sentence, comma-separated in order: 'Alice met Bob and Charlie at the park.' Answer with only the names.", "answer": "Alice, Bob, Charlie"}
+{"id": "ner2", "category": "ner", "prompt": "Which company is mentioned: 'Sundar works at Google in California.' Answer with only the company name.", "answer": "Google"}
+{"id": "ner3", "category": "ner", "prompt": "List the location names in order, comma-separated: 'We flew from Paris to Tokyo.' Answer with only the locations.", "answer": "Paris, Tokyo"}
+{"id": "ner4", "category": "ner", "prompt": "Extract the person's full name from: 'Dr. Emily Chen presented the findings.' Answer with only the full name.", "answer": "Emily Chen"}
+{"id": "dbg1", "category": "code_debug", "prompt": "What does this Python code print?\n```\nx = [1, 2, 3]\nprint(len(x))\n```\nAnswer with only the output.", "answer": "3"}
+{"id": "dbg2", "category": "code_debug", "prompt": "This function is meant to add one but is buggy:\n```\ndef add_one(n):\n    return n - 1\n```\nWhich single operator should replace '-' to fix it? Answer with only the operator.", "answer": "+"}
+{"id": "dbg3", "category": "code_debug", "prompt": "What is the output of print(2 ** 3) in Python? Answer with only the number.", "answer": "8"}
+{"id": "dbg4", "category": "code_debug", "prompt": "What does this print?\n```\ns = 'hello'\nprint(s.upper())\n```\nAnswer with only the output.", "answer": "HELLO"}
+{"id": "log1", "category": "logic", "prompt": "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops Lazzies? Answer only yes or no.", "answer": "yes"}
+{"id": "log2", "category": "logic", "prompt": "Tom is older than Sara. Sara is older than Mike. Who is the youngest? Answer with only the name.", "answer": "Mike"}
+{"id": "log3", "category": "logic", "prompt": "A farmer has 17 sheep. All but 9 run away. How many sheep are left? Answer with only the number.", "answer": "9"}
+{"id": "log4", "category": "logic", "prompt": "What number comes next: 1, 1, 2, 3, 5, 8, ? Answer with only the number.", "answer": "13"}
+{"id": "gen1", "category": "code_gen", "metric": "exec", "prompt": "Write a Python function `is_even(n)` that returns True if n is even, otherwise False. Answer with only the function definition.", "test": "assert is_even(4) == True\nassert is_even(7) == False\nassert is_even(0) == True"}
+{"id": "gen2", "category": "code_gen", "metric": "exec", "prompt": "Write a Python function `factorial(n)` that returns n factorial. Answer with only the function definition.", "test": "assert factorial(5) == 120\nassert factorial(0) == 1"}
+{"id": "gen3", "category": "code_gen", "metric": "exec", "prompt": "Write a Python function `reverse_string(s)` that returns s reversed. Answer with only the function definition.", "test": "assert reverse_string('abc') == 'cba'\nassert reverse_string('') == ''"}
+{"id": "gen4", "category": "code_gen", "metric": "exec", "prompt": "Write a Python function `count_vowels(s)` that returns the number of vowels (a, e, i, o, u) in s. Answer with only the function definition.", "test": "assert count_vowels('hello') == 2\nassert count_vowels('xyz') == 0"}
