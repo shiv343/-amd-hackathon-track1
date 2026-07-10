@@ -1,5 +1,12 @@
-"""Local-first cascade: try the free local model, verify, and escalate through
-Fireworks cheapest-first only when the verifier can't trust the local answer.
+"""The routing cascade.
+
+- LOCAL mode  (USE_LOCAL=1, default): try the free local model first; if the
+  verifier trusts it, submit it for 0 tokens; otherwise escalate to Fireworks
+  cheapest-first.
+- SCOUT mode  (USE_LOCAL=0): no local model shipped — route straight to
+  Fireworks (cheapest-first). Used by the lean scout container.
+
+The same function serves both, plus local-only pod testing (no Fireworks key).
 """
 from __future__ import annotations
 
@@ -20,31 +27,32 @@ class Result:
 
 def answer_task(task: dict, validator: Optional[Validator] = None) -> Result:
     msgs = [{"role": "user", "content": task["prompt"]}]
+    best: Optional[Result] = None
 
-    # Tier 0 — LOCAL (free).
-    local = clients.local_chat(msgs, temperature=0.0)
-    accept, _conf = verify(task, local.text, validator)
-    if accept:
-        return Result(task["id"], local.text, config.LOCAL_TIER.name, 0)
-
-    # Local wasn't confidently verified. Escalate to Fireworks — cheapest first,
-    # stopping at the first verified answer. Only if Fireworks is configured;
-    # without a key (local-only testing) we keep the best local answer rather
-    # than crash.
-    best = Result(task["id"], local.text, config.LOCAL_TIER.name + "*", 0)
-    if not config.FIREWORKS_ENABLED:
-        return best
-
-    for tier in config.FIREWORKS_LADDER:
+    # Tier 0 — LOCAL (free), when enabled and reachable.
+    if config.LOCAL_ENABLED:
         try:
-            before = clients.METER.total
-            fw = clients.fireworks_chat(tier.model, msgs, temperature=0.0)
-            spent = clients.METER.total - before
+            local = clients.local_chat(msgs, temperature=0.0)
+            accept, _conf = verify(task, local.text, validator)
+            if accept:
+                return Result(task["id"], local.text, config.LOCAL_TIER.name, 0)
+            best = Result(task["id"], local.text, config.LOCAL_TIER.name + "*", 0)
         except Exception:
-            break  # Fireworks unreachable/errored — fall back to best local answer.
-        best = Result(task["id"], fw.text, tier.name + "*", spent)
-        if validator is None or validator(task, fw.text):
-            return Result(task["id"], fw.text, tier.name, spent)
+            best = None  # local unreachable (e.g. scout container) — use Fireworks
 
-    # Nothing verified — return the strongest attempt (we must still answer).
-    return best
+    # Fireworks — cheapest first, stop at the first verified answer. This is the
+    # escalation path in local mode and the primary path in scout mode.
+    if config.FIREWORKS_ENABLED:
+        for tier in config.FIREWORKS_LADDER:
+            try:
+                start = clients.METER.total
+                fw = clients.fireworks_chat(tier.model, msgs, temperature=0.0)
+                spent = clients.METER.total - start
+            except Exception:
+                continue  # bad id / transient error — try the next model
+            best = Result(task["id"], fw.text, tier.name, spent)
+            if validator is None or validator(task, fw.text):
+                return best
+
+    # Best effort: local fallback, last Fireworks attempt, or empty.
+    return best or Result(task["id"], "", "none", 0)

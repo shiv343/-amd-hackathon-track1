@@ -25,6 +25,10 @@ SELF_CONSISTENCY_K = int(os.getenv("SELF_CONSISTENCY_K", "5"))
 # with your own $50 key). Without it, the agent runs local-only (no escalation).
 FIREWORKS_ENABLED = bool(FIREWORKS_API_KEY)
 
+# Set USE_LOCAL=0 to disable the local tier entirely — used by the lean "scout"
+# container that routes everything through Fireworks (no local model shipped).
+LOCAL_ENABLED = os.getenv("USE_LOCAL", "1") == "1"
+
 
 @dataclass(frozen=True)
 class Tier:

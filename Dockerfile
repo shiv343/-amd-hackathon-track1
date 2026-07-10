@@ -1,17 +1,20 @@
-# Base = ROCm + vLLM so the FREE local model runs inside the container.
-# CONFIRM the tag matches the scoring env (pod shows ROCm 7.2 + vLLM 0.16.0).
-FROM rocm/vllm:latest
+# Scout container (Submission 1): lean, Fireworks-only, no local model.
+# Purpose: confirm the image is pullable, the /input->/output contract works,
+# and see the real accuracy on the hidden tasks. linux/amd64, well under 10GB.
+#
+# The token-crusher container (Submission 2) will add a small local model to
+# drive tokens toward zero — separate, heavier build.
+FROM python:3.11-slim
 
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+COPY src ./src
 
-# The local model is served on localhost inside the container (zero-token tier).
-ENV LOCAL_BASE_URL=http://localhost:8000/v1
+# Scout mode: skip the local tier, route everything through the judge-provided
+# Fireworks endpoint (FIREWORKS_BASE_URL / FIREWORKS_API_KEY are injected at run).
+ENV USE_LOCAL=0
+ENV INPUT_PATH=/input/tasks.json
+ENV OUTPUT_PATH=/output/results.json
 
-# CONFIRM how the scoring harness invokes the container (entrypoint vs. server,
-# and whether it starts vLLM for us or expects us to). For a self-contained run,
-# an entrypoint script would: (1) launch `vllm serve $LOCAL_MODEL --port 8000`,
-# (2) wait for health, (3) exec the agent. Kept simple here:
 ENTRYPOINT ["python", "-m", "src.agent"]
