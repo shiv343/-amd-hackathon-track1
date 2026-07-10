@@ -38,10 +38,13 @@ class Tier:
 # reached when the verifier rejects the free local answer.
 LOCAL_TIER = Tier(name="local", model=LOCAL_MODEL, counted=False, price=0.0)
 
-# CONFIRM model IDs + live prices against the Fireworks pricing page / track rules.
+# The Track-1 ALLOWED Fireworks models (AMD ACT II). Cheapest -> priciest here is
+# a best guess — CONFIRM exact model-ID strings + prices from the Participant Guide
+# / Fireworks pricing and reorder. Route code tasks straight to the code model.
 FIREWORKS_LADDER = [
-    Tier("fw-gemma2-9b",    "accounts/fireworks/models/gemma-2-9b-it",          counted=True, price=0.20),
-    Tier("fw-llama3.1-8b",  "accounts/fireworks/models/llama-v3p1-8b-instruct",  counted=True, price=0.20),
-    Tier("fw-llama3.3-70b", "accounts/fireworks/models/llama-v3p3-70b-instruct", counted=True, price=0.90),
-    Tier("fw-qwen2.5-72b",  "accounts/fireworks/models/qwen2p5-72b-instruct",    counted=True, price=0.90),
+    Tier("fw-gemma4-31b-nvfp4", "gemma-4-31b-it-nvfp4", counted=True, price=0.10),  # FP4-quantized, cheapest
+    Tier("fw-gemma4-26b-a4b",   "gemma-4-26b-a4b-it",   counted=True, price=0.15),  # MoE, cheap
+    Tier("fw-gemma4-31b",       "gemma-4-31b-it",       counted=True, price=0.30),  # full precision
+    Tier("fw-minimax-m3",       "minimax-m3",           counted=True, price=0.60),  # strong generalist
+    Tier("fw-kimi-k2-code",     "kimi-k2p7-code",       counted=True, price=0.60),  # code specialist
 ]
