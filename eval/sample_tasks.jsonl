@@ -1,0 +1,3 @@
+{"id": "t1", "prompt": "What is the capital of France? Answer with one word.", "answer": "Paris"}
+{"id": "t2", "prompt": "Compute 17 * 23. Answer with just the number.", "answer": "391"}
+{"id": "t3", "prompt": "What color do you get by mixing blue and yellow? Answer with one word.", "answer": "green"}
