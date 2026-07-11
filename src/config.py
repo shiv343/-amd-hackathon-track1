@@ -46,9 +46,12 @@ LOCAL_TIER = Tier(name="local", model=LOCAL_MODEL, counted=False, price=0.0)
 # a best guess — CONFIRM exact model-ID strings + prices from the Participant Guide
 # / Fireworks pricing and reorder. Route code tasks straight to the code model.
 FIREWORKS_LADDER = [
-    Tier("fw-gemma4-31b-nvfp4", "gemma-4-31b-it-nvfp4", counted=True, price=0.10),  # FP4-quantized, cheapest
-    Tier("fw-gemma4-26b-a4b",   "gemma-4-26b-a4b-it",   counted=True, price=0.15),  # MoE, cheap
-    Tier("fw-gemma4-31b",       "gemma-4-31b-it",       counted=True, price=0.30),  # full precision
-    Tier("fw-minimax-m3",       "minimax-m3",           counted=True, price=0.60),  # strong generalist
-    Tier("fw-kimi-k2-code",     "kimi-k2p7-code",       counted=True, price=0.60),  # code specialist
+    # CONFIRMED callable via fw_check.py (need the full "accounts/fireworks/models/" id):
+    Tier("fw-minimax-m3", "accounts/fireworks/models/minimax-m3",     counted=True, price=1.20),  # cheapest, general
+    Tier("fw-kimi-code",  "accounts/fireworks/models/kimi-k2p7-code", counted=True, price=4.00),  # returns clean text; code
+    # Allowed per the rules but 404 on the public API for this account — may exist
+    # only on the judge's proxy. Kept as fallbacks (auto-skipped if unavailable).
+    Tier("fw-gemma4-nvfp4", "accounts/fireworks/models/gemma-4-31b-it-nvfp4", counted=True, price=0.50),
+    Tier("fw-gemma4-a4b",   "accounts/fireworks/models/gemma-4-26b-a4b-it",   counted=True, price=0.50),
+    Tier("fw-gemma4-31b",   "accounts/fireworks/models/gemma-4-31b-it",       counted=True, price=1.00),
 ]
