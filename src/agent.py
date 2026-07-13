@@ -1,9 +1,10 @@
 """Container entrypoint for the AMD ACT II Track-1 judge.
 
-Contract (from observed submissions): the judge mounts tasks at /input/tasks.json
-and reads answers from /output/results.json. Exact field names still vary, so we
-read defensively and NEVER crash — a crash triggers RUNTIME_ERROR (a wasted,
-hours-long scoring cycle). Better to emit whatever we can.
+Judge mounts tasks at /input/tasks.json, reads answers from /output/results.json.
+The exact results schema isn't published, so the OUTPUT SHAPE is switchable via
+RESULTS_FORMAT (list | wrapped | map) and each item echoes the original task
+(preserving the exact id field) plus the answer under several key aliases.
+Never crash — a crash = RUNTIME_ERROR = a wasted scoring cycle.
 """
 from __future__ import annotations
 
@@ -16,16 +17,15 @@ from .cascade import answer_task
 
 INPUT_CANDIDATES = [
     os.getenv("INPUT_PATH"),
-    "/input/tasks.json",
-    "/input/tasks.jsonl",
-    "/data/tasks.json",
-    "/data/input.json",
-    "tasks.json",
+    "/input/tasks.json", "/input/tasks.jsonl",
+    "/data/tasks.json", "/data/input.json", "tasks.json",
 ]
 OUTPUT_PATH = os.getenv("OUTPUT_PATH", "/output/results.json")
+RESULTS_FORMAT = os.getenv("RESULTS_FORMAT", "list")   # list | wrapped | map
 
 ID_KEYS = ("id", "task_id", "taskId", "uid")
 PROMPT_KEYS = ("prompt", "question", "input", "text", "query", "instruction")
+ANSWER_KEYS = ("answer", "response", "output", "result", "prediction")
 
 
 def _find_input(argv_path):
@@ -40,7 +40,7 @@ def _load(path: str) -> list:
         if path.endswith(".jsonl"):
             return [json.loads(line) for line in f if line.strip()]
         data = json.load(f)
-    if isinstance(data, dict):  # unwrap {"tasks": [...]} / {"data": [...]}
+    if isinstance(data, dict):
         data = data.get("tasks") or data.get("data") or data.get("items") or []
     return data
 
@@ -53,11 +53,11 @@ def _field(task, keys, default=None):
     return default
 
 
-def _write(results, path: str) -> None:
+def _write(payload, path: str) -> None:
     try:
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(results, f, ensure_ascii=False)
+            json.dump(payload, f, ensure_ascii=False)
     except Exception as e:
         print(f"WARN: could not write {path}: {e}", file=sys.stderr)
 
@@ -69,31 +69,44 @@ def main() -> None:
     in_path = _find_input(argv_in)
     if not in_path:
         print(f"WARN: no input found; looked at {INPUT_CANDIDATES}", file=sys.stderr)
-        _write([], out_path)
+        _write([] if RESULTS_FORMAT != "map" else {}, out_path)
         return
 
     try:
         tasks = _load(in_path)
     except Exception as e:
         print(f"WARN: could not parse {in_path}: {e}", file=sys.stderr)
-        _write([], out_path)
+        _write([] if RESULTS_FORMAT != "map" else {}, out_path)
         return
 
-    results, tier_counts = [], {}
+    items, id_to_ans, tiers = [], {}, {}
     for i, task in enumerate(tasks):
-        tid = _field(task, ID_KEYS, default=i)
-        prompt = _field(task, PROMPT_KEYS, default="")
+        raw = task if isinstance(task, dict) else {"id": i, "prompt": str(task)}
+        tid = _field(raw, ID_KEYS, default=i)
+        prompt = _field(raw, PROMPT_KEYS, default="")
         try:
             r = answer_task({"id": tid, "prompt": prompt})
-            answer, tier = r.answer, r.tier
-        except Exception as e:  # one bad task must not sink the whole run
-            answer, tier = "", "error"
+            ans, tier = r.answer, r.tier
+        except Exception as e:
+            ans, tier = "", "error"
             print(f"WARN: task {tid} failed: {e}", file=sys.stderr)
-        results.append({"id": tid, "answer": answer})
-        tier_counts[tier] = tier_counts.get(tier, 0) + 1
 
-    _write(results, out_path)
-    print(f"Wrote {len(results)} answers to {out_path}. Tiers: {tier_counts}", file=sys.stderr)
+        item = dict(raw)                    # echo the input task -> preserves exact id field
+        for k in ANSWER_KEYS:
+            item[k] = ans
+        items.append(item)
+        id_to_ans[str(tid)] = ans
+        tiers[tier] = tiers.get(tier, 0) + 1
+
+    if RESULTS_FORMAT == "map":
+        payload = id_to_ans
+    elif RESULTS_FORMAT == "wrapped":
+        payload = {"results": items}
+    else:
+        payload = items
+
+    _write(payload, out_path)
+    print(f"Wrote {len(items)} answers ({RESULTS_FORMAT}) to {out_path}. Tiers: {tiers}", file=sys.stderr)
     print(clients.METER.report(), file=sys.stderr)
 
 
