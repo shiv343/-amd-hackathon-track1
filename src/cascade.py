@@ -41,7 +41,7 @@ def answer_task(task: dict, validator: Optional[Validator] = None) -> Result:
     # Tier 0 — LOCAL (free), when enabled and reachable.
     if config.LOCAL_ENABLED:
         try:
-            local = clients.local_chat(msgs, temperature=0.0)
+            local = clients.local_chat(msgs, temperature=0.0, max_tokens=2048)
             accept, _conf = verify(task, local.text, validator)
             if accept:
                 return Result(task["id"], local.text, config.LOCAL_TIER.name, 0)
@@ -55,7 +55,7 @@ def answer_task(task: dict, validator: Optional[Validator] = None) -> Result:
         for tier in config.FIREWORKS_LADDER:
             try:
                 start = clients.METER.total
-                fw = clients.fireworks_chat(tier.model, msgs, temperature=0.0)
+                fw = clients.fireworks_chat(tier.model, msgs, temperature=0.0, max_tokens=2048)
                 spent = clients.METER.total - start
             except Exception:
                 continue  # bad id / transient error — try the next model

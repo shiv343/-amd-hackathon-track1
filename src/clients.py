@@ -52,11 +52,14 @@ class TokenMeter:
 
 METER = TokenMeter()
 
-_local = OpenAI(base_url=config.LOCAL_BASE_URL, api_key="EMPTY")
-_fireworks = OpenAI(base_url=config.FIREWORKS_BASE_URL, api_key=config.FIREWORKS_API_KEY or "EMPTY")
+# timeout per request + no SDK-internal retries (tenacity handles retries) so a
+# slow/hung call can't blow the grading time limit.
+_local = OpenAI(base_url=config.LOCAL_BASE_URL, api_key="EMPTY", timeout=45, max_retries=0)
+_fireworks = OpenAI(base_url=config.FIREWORKS_BASE_URL,
+                    api_key=config.FIREWORKS_API_KEY or "EMPTY", timeout=45, max_retries=0)
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=10))
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=1, min=1, max=4))
 def _chat(client: OpenAI, model: str, messages, counted: bool, **kw) -> Completion:
     resp = client.chat.completions.create(model=model, messages=messages, **kw)
     u = resp.usage

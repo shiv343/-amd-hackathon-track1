@@ -11,9 +11,12 @@ from __future__ import annotations
 import json
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 from . import clients
 from .cascade import answer_task
+
+MAX_WORKERS = int(os.getenv("MAX_WORKERS", "8"))   # concurrent Fireworks calls
 
 INPUT_CANDIDATES = [
     os.getenv("INPUT_PATH"),
@@ -77,17 +80,25 @@ def main() -> None:
         _write([], out_path)
         return
 
-    results, tiers = [], {}
-    for i, task in enumerate(tasks):
-        raw = task if isinstance(task, dict) else {"task_id": str(i), "prompt": str(task)}
+    def _solve(item):
+        i, raw = item
         tid = _field(raw, ID_KEYS, default=str(i))
         prompt = _field(raw, PROMPT_KEYS, default="")
         try:
             r = answer_task({"id": tid, "prompt": prompt})
-            ans, tier = r.answer, r.tier
+            return tid, r.answer, r.tier
         except Exception as e:
-            ans, tier = "", "error"
             print(f"WARN: task {tid} failed: {e}", file=sys.stderr)
+            return tid, "", "error"
+
+    raws = [(i, t if isinstance(t, dict) else {"task_id": str(i), "prompt": str(t)})
+            for i, t in enumerate(tasks)]
+    workers = max(1, min(MAX_WORKERS, len(raws)))
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        solved = list(ex.map(_solve, raws))   # ex.map preserves input order
+
+    results, tiers = [], {}
+    for tid, ans, tier in solved:
         results.append({"task_id": tid, "answer": ans})   # exact schema
         tiers[tier] = tiers.get(tier, 0) + 1
 
