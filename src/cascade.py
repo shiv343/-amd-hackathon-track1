@@ -25,8 +25,17 @@ class Result:
     counted_tokens: int  # Fireworks tokens spent on this task (0 if local)
 
 
+SYSTEM = (
+    "You are a precise assistant. Answer the task directly, correctly, and completely. "
+    "Obey every format constraint stated in the task exactly — e.g. an exact number of "
+    "sentences or bullet points, a required label, or a requested one-sentence reason. "
+    "Do not add preamble, restate the question, or extra commentary beyond what is asked."
+)
+
+
 def answer_task(task: dict, validator: Optional[Validator] = None) -> Result:
-    msgs = [{"role": "user", "content": task["prompt"]}]
+    msgs = [{"role": "system", "content": SYSTEM},
+            {"role": "user", "content": task["prompt"]}]
     best: Optional[Result] = None
 
     # Tier 0 — LOCAL (free), when enabled and reachable.

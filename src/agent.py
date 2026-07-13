@@ -1,9 +1,9 @@
 """Container entrypoint for the AMD ACT II Track-1 judge.
 
-Judge mounts tasks at /input/tasks.json, reads answers from /output/results.json.
-The exact results schema isn't published, so the OUTPUT SHAPE is switchable via
-RESULTS_FORMAT (list | wrapped | map) and each item echoes the original task
-(preserving the exact id field) plus the answer under several key aliases.
+Judge mounts tasks at /input/tasks.json and reads answers from /output/results.json.
+CONFIRMED schema (lablab admin): results.json is a LIST of objects, each with
+exactly a "task_id" and an "answer" field:
+    [{"task_id": "v1", "answer": "..."}, ...]
 Never crash — a crash = RUNTIME_ERROR = a wasted scoring cycle.
 """
 from __future__ import annotations
@@ -21,11 +21,9 @@ INPUT_CANDIDATES = [
     "/data/tasks.json", "/data/input.json", "tasks.json",
 ]
 OUTPUT_PATH = os.getenv("OUTPUT_PATH", "/output/results.json")
-RESULTS_FORMAT = os.getenv("RESULTS_FORMAT", "list")   # list | wrapped | map
 
-ID_KEYS = ("id", "task_id", "taskId", "uid")
+ID_KEYS = ("task_id", "id", "taskId", "uid")          # spec uses task_id
 PROMPT_KEYS = ("prompt", "question", "input", "text", "query", "instruction")
-ANSWER_KEYS = ("answer", "response", "output", "result", "prediction")
 
 
 def _find_input(argv_path):
@@ -69,20 +67,20 @@ def main() -> None:
     in_path = _find_input(argv_in)
     if not in_path:
         print(f"WARN: no input found; looked at {INPUT_CANDIDATES}", file=sys.stderr)
-        _write([] if RESULTS_FORMAT != "map" else {}, out_path)
+        _write([], out_path)
         return
 
     try:
         tasks = _load(in_path)
     except Exception as e:
         print(f"WARN: could not parse {in_path}: {e}", file=sys.stderr)
-        _write([] if RESULTS_FORMAT != "map" else {}, out_path)
+        _write([], out_path)
         return
 
-    items, id_to_ans, tiers = [], {}, {}
+    results, tiers = [], {}
     for i, task in enumerate(tasks):
-        raw = task if isinstance(task, dict) else {"id": i, "prompt": str(task)}
-        tid = _field(raw, ID_KEYS, default=i)
+        raw = task if isinstance(task, dict) else {"task_id": str(i), "prompt": str(task)}
+        tid = _field(raw, ID_KEYS, default=str(i))
         prompt = _field(raw, PROMPT_KEYS, default="")
         try:
             r = answer_task({"id": tid, "prompt": prompt})
@@ -90,23 +88,11 @@ def main() -> None:
         except Exception as e:
             ans, tier = "", "error"
             print(f"WARN: task {tid} failed: {e}", file=sys.stderr)
-
-        item = dict(raw)                    # echo the input task -> preserves exact id field
-        for k in ANSWER_KEYS:
-            item[k] = ans
-        items.append(item)
-        id_to_ans[str(tid)] = ans
+        results.append({"task_id": tid, "answer": ans})   # exact schema
         tiers[tier] = tiers.get(tier, 0) + 1
 
-    if RESULTS_FORMAT == "map":
-        payload = id_to_ans
-    elif RESULTS_FORMAT == "wrapped":
-        payload = {"results": items}
-    else:
-        payload = items
-
-    _write(payload, out_path)
-    print(f"Wrote {len(items)} answers ({RESULTS_FORMAT}) to {out_path}. Tiers: {tiers}", file=sys.stderr)
+    _write(results, out_path)
+    print(f"Wrote {len(results)} results to {out_path}. Tiers: {tiers}", file=sys.stderr)
     print(clients.METER.report(), file=sys.stderr)
 
 
